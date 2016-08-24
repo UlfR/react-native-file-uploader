@@ -95,6 +95,7 @@ RCT_EXPORT_METHOD(upload:
     
     [request setHTTPMethod:settings[METHOD_FIELD] ?: @"POST"];
     [request setValue:@"Keep-Alive" forHTTPHeaderField:@"Connection"];
+    [request setValue:settings[@"authorization"]?:@"" forHTTPHeaderField:@"Authorization"];
     [request setValue:@"React Native File Uploader iOS HTTP Client" forHTTPHeaderField:@"User-Agent"];
     [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary] forHTTPHeaderField:@"Content-Type"];
     
