@@ -51,6 +51,9 @@ RCT_EXPORT_METHOD(upload:
     if ([uri hasPrefix:@"file:"]) {
         [self uploadUri:settings callback:callback];
     }
+    else if ([uri hasPrefix:@"assets-library:"]) {
+        [self uploadAsset:settings callback:callback];
+    }
     else if ([uri isAbsolutePath]) {
         [self uploadFile:settings callback:callback];
     }
@@ -76,6 +79,36 @@ RCT_EXPORT_METHOD(upload:
     NSURL *url = [NSURL URLWithString:settings[URI_FIELD]];
     NSError *error;
     NSData *data = [NSData dataWithContentsOfURL:url options:NSDataReadingMappedIfSafe error:&error];
+    if (error) {
+        callback(@[RCTMakeError([error localizedDescription], nil, nil)]);
+    } else {
+        [self uploadData:data settings:settings callback:callback];
+    }
+}
+
+- (void)uploadAsset:(NSDictionary *)settings callback:(RCTResponseSenderBlock)callback {
+    NSURL *url = [NSURL URLWithString:settings[URI_FIELD]];
+    
+    NSURL *assetUrl = [[NSURL alloc] initWithString:url];
+    ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+    __block BOOL isFinished = NO;
+    __block NSData * tempData = nil;
+    [library assetForURL:assetUrl resultBlock:^(ALAsset *asset) {
+        ALAssetRepresentation *rep = [asset defaultRepresentation];
+        
+        CGImageRef fullScreenImageRef = [rep fullScreenImage];
+        UIImage *image = [UIImage imageWithCGImage:fullScreenImageRef];
+        tempData = UIImagePNGRepresentation(image);
+        isFinished = YES;
+    } failureBlock:^(NSError *error) {
+        NSLog(@"ALAssetsLibrary assetForURL error:%@", error);
+        isFinished = YES;
+    }];
+    while (!isFinished) {
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01f]];
+    }
+    NSData *data = tempData;
+
     if (error) {
         callback(@[RCTMakeError([error localizedDescription], nil, nil)]);
     } else {
