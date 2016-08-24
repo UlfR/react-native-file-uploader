@@ -11,6 +11,7 @@
 #import "RCTFileUploader.h"
 #import "RCTUtils.h"
 #import "RCTEventDispatcher.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
 static NSString *const URI_FIELD = @"uri";
 static NSString *const METHOD_FIELD = @"method";
@@ -87,9 +88,9 @@ RCT_EXPORT_METHOD(upload:
 }
 
 - (void)uploadAsset:(NSDictionary *)settings callback:(RCTResponseSenderBlock)callback {
-    NSURL *url = [NSURL URLWithString:settings[URI_FIELD]];
+    NSURL *assetUrl = [NSURL URLWithString:settings[URI_FIELD]];
     
-    NSURL *assetUrl = [[NSURL alloc] initWithString:url];
+    //NSURL *assetUrl = [[NSURL alloc] initWithString:url];
     ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
     __block BOOL isFinished = NO;
     __block NSData * tempData = nil;
@@ -100,19 +101,15 @@ RCT_EXPORT_METHOD(upload:
         UIImage *image = [UIImage imageWithCGImage:fullScreenImageRef];
         tempData = UIImagePNGRepresentation(image);
         isFinished = YES;
+        [self uploadData:tempData settings:settings callback:callback];
     } failureBlock:^(NSError *error) {
         NSLog(@"ALAssetsLibrary assetForURL error:%@", error);
+        callback(@[RCTMakeError([error localizedDescription], nil, nil)]);
+
         isFinished = YES;
     }];
     while (!isFinished) {
       [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.01f]];
-    }
-    NSData *data = tempData;
-
-    if (error) {
-        callback(@[RCTMakeError([error localizedDescription], nil, nil)]);
-    } else {
-        [self uploadData:data settings:settings callback:callback];
     }
 }
 
