@@ -75,6 +75,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
             String method = getStringParam(settings, METHOD_FIELD, "POST");
             connection.setRequestMethod(method);
             connection.setRequestProperty("Connection", "Keep-Alive");
+            connection.setRequestProperty("Authorization", getStringParam(settings, "authorization", ""));
             connection.setRequestProperty("User-Agent", "React Native File Uploader Android HTTP Client");
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
