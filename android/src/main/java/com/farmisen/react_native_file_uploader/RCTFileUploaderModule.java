@@ -1,7 +1,7 @@
 /**
  * Copyright © 2016 Fabrice Armisen <farmisen@gmail.com>
  * This program is free software. It comes without any warranty, to
- * the extent permitted by applicable law. You can redistribute it and/or modify 
+ * the extent permitted by applicable law. You can redistribute it and/or modify
  * it under the terms of the Do What The Fuck You Want To Public License, Version 2,
  * as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
  */
@@ -9,6 +9,7 @@
 package com.farmisen.react_native_file_uploader;
 
 import android.net.Uri;
+
 import com.facebook.react.bridge.*;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
@@ -46,15 +47,33 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
         String uri = settings.getString(URI_FIELD);
         String path = null;
         if (uri.startsWith("file:") || uri.startsWith("content:")) {
-            path = (Uri.parse(uri)).getPath();
-        }
-        else if ( this.isAbsolutePath(uri)) {
+            path = Utils.getPath(getReactApplicationContext(), Uri.parse(uri));
+        } else if (this.isAbsolutePath(uri)) {
             path = uri;
-        }
-        else {
+        } else {
             callback.invoke("Can't handle " + uri, null);
         }
-        this.uploadFile(path, settings, callback);
+
+        //this.uploadFile(path, settings, callback);
+        Thread thread = new Thread(new Upload(path, settings, callback));
+        thread.start();
+    }
+
+    class Upload implements Runnable {
+        String path;
+        ReadableMap settings;
+        Callback callback;
+
+        public Upload(String path, ReadableMap settings, Callback callback) {
+            this.path = path;
+            this.settings = settings;
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            uploadFile(this.path, this.settings, this.callback);
+        }
     }
 
     private void uploadFile(String path, ReadableMap settings, Callback callback) {
@@ -152,7 +171,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
     }
 
     private ReadableMap getMapParam(ReadableMap map, String key, ReadableMap defaultValue) {
-        if ( map.hasKey(key)) {
+        if (map.hasKey(key)) {
             return map.getMap(key);
         } else {
             return defaultValue;
@@ -160,7 +179,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
     }
 
     private String getStringParam(ReadableMap map, String key, String defaultValue) {
-        if ( map.hasKey(key)) {
+        if (map.hasKey(key)) {
             return map.getString(key);
         } else {
             return defaultValue;
