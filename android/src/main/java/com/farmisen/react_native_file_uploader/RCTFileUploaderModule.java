@@ -52,6 +52,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
             path = uri;
         } else {
             callback.invoke("Can't handle " + uri, null);
+            return;
         }
 
         //this.uploadFile(path, settings, callback);
@@ -95,6 +96,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
             connection.setRequestMethod(method);
             connection.setRequestProperty("Connection", "Keep-Alive");
             connection.setRequestProperty("Authorization", getStringParam(settings, "authorization", ""));
+            connection.setRequestProperty("Cookie", getStringParam(settings, "cookie", ""));
             connection.setRequestProperty("User-Agent", "React Native File Uploader Android HTTP Client");
             connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
