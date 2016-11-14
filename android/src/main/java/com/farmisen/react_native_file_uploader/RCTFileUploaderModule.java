@@ -8,6 +8,7 @@
 
 package com.farmisen.react_native_file_uploader;
 
+import android.util.Log;
 import android.net.Uri;
 
 import com.facebook.react.bridge.*;
@@ -31,7 +32,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
 
     public static final String TWO_HYPHENS = "--";
     public static final String LINE_END = "\r\n";
-    public static final int MAX_BUFFER_SIZE = 1024 * 128;
+    public static final int MAX_BUFFER_SIZE = 1024 * 1024;
 
     public RCTFileUploaderModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -91,6 +92,7 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
             connection.setDoInput(true);
             connection.setDoOutput(true);
             connection.setUseCaches(false);
+            connection.setChunkedStreamingMode(MAX_BUFFER_SIZE);
 
             String method = getStringParam(settings, METHOD_FIELD, "POST");
             connection.setRequestMethod(method);
@@ -122,7 +124,9 @@ public class RCTFileUploaderModule extends ReactContextBaseJavaModule implements
             buffer = new byte[bufferSize];
             bytesRead = fileInputStream.read(buffer, 0, bufferSize);
             while (bytesRead > 0) {
+                Log.v("UPLOADER", "readed " + bytesRead);
                 outputStream.write(buffer, 0, bufferSize);
+                Log.v("UPLOADER", "writed " + bufferSize);
                 bytesAvailable = fileInputStream.available();
                 bufferSize = Math.min(bytesAvailable, maxBufferSize);
                 bytesRead = fileInputStream.read(buffer, 0, bufferSize);
