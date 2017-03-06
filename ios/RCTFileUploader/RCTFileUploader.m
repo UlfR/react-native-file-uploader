@@ -9,8 +9,8 @@
 //
 
 #import "RCTFileUploader.h"
-#import "RCTUtils.h"
-#import "RCTEventDispatcher.h"
+#import <React/RCTUtils.h>
+#import <React/RCTEventDispatcher.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
 static NSString *const URI_FIELD = @"uri";
