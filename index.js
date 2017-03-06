@@ -1,4 +1,5 @@
-import React, { NativeModules, DeviceEventEmitter } from 'react-native'
+import React from 'react'
+import { NativeModules, DeviceEventEmitter } from 'react-native'
 
 const callbacks = {};
 const progressCallbacks = {};
